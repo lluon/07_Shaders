@@ -15,9 +15,62 @@ void ofApp::setup(){
     
     // Build shader (from GLSL code)
     build(shader, R"(
+         
+        struct Light {
+            vec3 pos;
+            float strength;
+            float halfDist;
+            float ambient;
+            vec3 diffuse;
+            vec3 specular;
+        };
+
+        struct Material {
+            vec3 diffuse;
+            vec3 specular;
+            float shine;
+        };
+
+        struct LightFall {
+            vec3 diffuse;
+            vec3 specular;
+        };
  
- // Vertex program
- 
+        // In-place addition : a += b
+        void addTo(inout LightFall a, in LightFall b){
+            a.diffuse += b.diffuse;
+            a.specular += b.specular;
+        }
+
+        // Compute light components falling on surface
+        LightFall computeLightFall(vec3 pos, vec3 N, vec3 eye, in Light lt, in Material mt){
+            vec3 lightDist = lt.pos - pos;
+            float hh = lt.halfDist * lt.halfDist;
+            float atten = lt.strength * hh/(hh + dot(lightDist, lightDist));
+
+            vec3 L = normalize(lightDist);
+
+            // diffuse
+            float d = max(dot(N, L), 0.);
+            d += lt.ambient;
+
+            //specular
+            vec3 V = normalize(eye - pos);
+            vec3 H = normalize(L + V);
+            float s = pow(max(dot(N, H), 0.), mt.shine);
+            LightFall fall;
+            fall.diffuse = lt.diffuse * (d * atten);
+            fall.specular = lt.specular * (s * atten);
+            return fall;
+        }
+
+        // Get final color reflected off material
+        vec3 lightColor(in LightFall f, in Material mt){
+            return f.diffuse * mt.diffuse + f.specular * mt.specular;
+        }
+
+        // Vertex program
+
         uniform mat4 projectionMatrix;
         uniform mat4 viewMatrix;
         uniform mat4 modelMatrix;
@@ -28,57 +81,35 @@ void ofApp::setup(){
         in vec3 normal;
         in vec3 color;
         out vec3 vcolor;
- 
- 
 
       void main(){
  
-         vec3 pos = (modelMatrix*position).xyz;//convert from object to world space
-         vec3 N = normalize(mat3(modelMatrix)*normal); //assumes only uniform scaling
-         gl_Position = projectionMatrix * viewMatrix * vec4(pos,1.);
+        vcolor = color;
  
-            // light material setup
+        vec3 pos = (modelMatrix*position).xyz;
+        vec3 N = normalize(mat3(modelMatrix)*normal); 
+        gl_Position = projectionMatrix * viewMatrix * vec4(pos,1.);
  
-            vcolor = color ;
+            // light 1 setup
  
-             vec3 lightPos = vec3(0., 0., 0.);
-             float lightAmbient = 0.2;
-             vec3 lightDiffuse = vec3(1.);
-             vec3 lightSpecular = vec3(1.);
- 
-             float lightHalfDist = 1.;
-             float lightStrength = 1.;
+            Light light1;
+            light1.pos = vec3(1., 0., 0.);
+            light1.strength = 1.;
+            light1.halfDist = 1.;
+            light1.ambient = 0.2;
+            light1.diffuse = vec3(0., 1., 0.);
+            light1.specular = light1.diffuse;
+      
+            // setup Material
+            Material mtrl;
+            mtrl.diffuse = vec3(1.);
+            mtrl.specular = vec3(0.5);
+            mtrl.shine = 60.;
 
- 
-             vec3 mtrlDiffuse = vcolor;
-             vec3 mtrlSpecular = vec3(0.5);
-             float mtrlShine = 60.;
+            LightFall fall = computeLightFall(pos, N, eye, light1, mtrl);
+            vcolor = lightColor(fall, mtrl);
 
-            // Diffuse logic
- 
-            vec3 lightDist = lightPos - pos; // lorenzian attenuation
-
-             vec3 L = normalize(lightPos - pos);
-             float d = max(dot(N, L), 0.);
-             vcolor = mtrlDiffuse * lightDiffuse * (d + lightAmbient);
- 
-            //specular logic
- 
-            vec3 V = normalize(eye - pos);
-            vec3 H = normalize(L + V);
-            float s = pow(max(dot(N, H), 0.), mtrlShine);
-
-            // shine logic
-            vcolor = mtrlDiffuse*lightDiffuse*(d + lightAmbient);
-            vcolor += mtrlSpecular*lightSpecular*s;
- 
-            //lorenzian attenuattion
-
-            float hh = lightHalfDist*lightHalfDist;
-            float atten = lightStrength*hh/(hh + dot(lightDist,lightDist));
- 
-             vcolor *= atten;
- 
+            gl_Position = projectionMatrix * viewMatrix * vec4(pos, 1.);
         }
  
  )", R"(
