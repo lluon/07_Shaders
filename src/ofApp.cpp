@@ -26,18 +26,26 @@ void ofApp::setup(){
       out vec3 vcolor;
 
       void main(){
-        vcolor = vec3(0.,1.,0.);
-        vec3 pos = (modelMatrix*position).xyz; 
-        gl_Position = projectionMatrix * viewMatrix * vec4(pos,1.);
+ 
+         vec3 pos = (modelMatrix*position).xyz;//convert from object to world space
+         vec3 N = normalize(mat3(modelMatrix)*normal); //assumes only uniform scaling
+         gl_Position = projectionMatrix * viewMatrix * vec4(pos,1.);
+ 
+             vcolor = color ;
+             vec3 L = vec3 (0., 1., 0.) ;
+             float d = max ( dot (N, L), 0.) ;
+             vcolor *= d ;
+             
+ 
         }
  
  )", R"(
   // Fragment program
-  in vec3 vcolor;	// interpolant from vertex shader
-  out vec4 fragColor;	// output pixel color (RGBA)
+  in vec3 vcolor;
+  out vec4 fragColor;
  
   void main(){
-   vec3 col = vcolor;
+    vec3 col = vcolor;
    fragColor = vec4(col, 1.);
   }
  )");
@@ -57,7 +65,7 @@ void ofApp::update(){
 void ofApp::draw(){
 	cam.begin();
 	shader.begin();
-	shader.setUniform1f("appTime", ofGetFrameNum()/ofGetTargetFrameRate());
+	//shader.setUniform1f("appTime", ofGetFrameNum()/ofGetTargetFrameRate());
 	mesh.draw();
 	shader.end();
 	cam.end();
