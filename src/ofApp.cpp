@@ -4,49 +4,48 @@ using namespace glm;
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-	// Setup camera (for 3D rendering)
-	cam.setPosition(vec3(0., 0., 2.));
-	cam.setNearClip(0.05);
-	cam.setFarClip(100.);
+    // Setup camera (for 3D rendering)
+    cam.setPosition(vec3(0., 0., 2.));
+    cam.setNearClip(0.05);
+    cam.setFarClip(100.);
+    
+    // Other setup for 3D rendering
+    ofEnableDepthTest();
+    ofSetFrameRate(40); // must be set for ofGetTargetFrameRate to work
+    
+    // Build shader (from GLSL code)
+    build(shader, R"(
+  // Vertex program
+      uniform mat4 projectionMatrix;
+      uniform mat4 viewMatrix;
+      uniform mat4 modelMatrix;
 
-	// Other setup for 3D rendering
-	ofEnableDepthTest();
-	ofSetFrameRate(40); // must be set for ofGetTargetFrameRate to work
+      in vec4 position;
+      in vec3 normal;
+      in vec3 color;
+      out vec3 vcolor;
 
-	// Build shader (from GLSL code)
-	build(shader, R"(
-		// Vertex program
-          uniform mat4 projectionMatrix;
-          uniform mat4 viewMatrix;
-          uniform mat4 modelMatrix;
+      void main(){
+        vcolor = vec3(0.,1.,0.);
+        vec3 pos = (modelMatrix*position).xyz; 
+        gl_Position = projectionMatrix * viewMatrix * vec4(pos,1.);
+        }
  
-          in vec4 position;
-          in vec3 normal;
-          in vec3 color;
-          out vec3 vcolor;
-
-          void main(){
-            vcolor = vec3(0.,1.,0.);
-            vec3 pos = (modelMatrix*position).xyz; //convert from object to world space
-            vec3 N = normalize(mat3(modelMatrix) * normal); //assumes only uniform scaling
-            gl_Position = projectionMatrix * viewMatrix * vec4(pos, 1.);
-         }
+ )", R"(
+  // Fragment program
+  in vec3 vcolor;	// interpolant from vertex shader
+  out vec4 fragColor;	// output pixel color (RGBA)
+ 
+  void main(){
+   vec3 col = vcolor;
+   fragColor = vec4(col, 1.);
   }
-
-
-
-	)", R"(
-		// Fragment program
-		in vec3 vcolor;	// interpolant from vertex shader
-		out vec4 fragColor;	// output pixel color (RGBA)
-
-		void main(){
-			vec3 col = vcolor;
-			fragColor = vec4(col, 1.);
-		}
-	)");
-
-	mesh = ofMesh::plane(2.,2., 64,64);
+ )");
+    
+    
+    mesh = ofMesh::sphere(1.,32);
+    for (auto pos : mesh.getVertices())
+         mesh.addColor(ofFloatColor(0, 0, 1));
 }
 
 //--------------------------------------------------------------
