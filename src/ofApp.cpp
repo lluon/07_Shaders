@@ -97,8 +97,14 @@ void ofApp::setup(){
             light1.strength = 1.;
             light1.halfDist = 1.;
             light1.ambient = 0.2;
-            light1.diffuse = vec3(0., 1., 0.);
+            light1.diffuse = vec3(1., 0.5, 0.); // orange
             light1.specular = light1.diffuse;
+ 
+            Light light2 = light1;
+            light2.pos = -light1.pos;
+            light2.diffuse = vec3(1., 0., 1.);
+            light2.specular = light2.diffuse;
+
       
             // setup Material
             Material mtrl;
@@ -106,9 +112,13 @@ void ofApp::setup(){
             mtrl.specular = vec3(0.5);
             mtrl.shine = 60.;
 
+            // light fall light 1+2 
             LightFall fall = computeLightFall(pos, N, eye, light1, mtrl);
-            vcolor = lightColor(fall, mtrl);
+            addTo(fall, computeLightFall(pos, N, eye, light2, mtrl));
 
+            vcolor = lightColor(fall, mtrl); 
+ 
+ 
             gl_Position = projectionMatrix * viewMatrix * vec4(pos, 1.);
         }
  
