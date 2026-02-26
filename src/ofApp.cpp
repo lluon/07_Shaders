@@ -15,17 +15,21 @@ void ofApp::setup(){
     
     // Build shader (from GLSL code)
     build(shader, R"(
-  // Vertex program
-      uniform mat4 projectionMatrix;
-      uniform mat4 viewMatrix;
-      uniform mat4 modelMatrix;
  
-      uniform vec3 eye;
-
-      in vec4 position;
-      in vec3 normal;
-      in vec3 color;
-      out vec3 vcolor;
+ // Vertex program
+ 
+        uniform mat4 projectionMatrix;
+        uniform mat4 viewMatrix;
+        uniform mat4 modelMatrix;
+ 
+        uniform vec3 eye;
+  
+        in vec4 position;
+        in vec3 normal;
+        in vec3 color;
+        out vec3 vcolor;
+ 
+ 
 
       void main(){
  
@@ -36,16 +40,24 @@ void ofApp::setup(){
             // light material setup
  
             vcolor = color ;
-             vec3 lightPos = vec3(0., 100., 0.);
+ 
+             vec3 lightPos = vec3(0., 0., 0.);
              float lightAmbient = 0.2;
              vec3 lightDiffuse = vec3(1.);
              vec3 lightSpecular = vec3(1.);
+ 
+             float lightHalfDist = 1.;
+             float lightStrength = 1.;
+
+ 
              vec3 mtrlDiffuse = vcolor;
              vec3 mtrlSpecular = vec3(0.5);
              float mtrlShine = 60.;
 
             // Diffuse logic
  
+            vec3 lightDist = lightPos - pos; // lorenzian attenuation
+
              vec3 L = normalize(lightPos - pos);
              float d = max(dot(N, L), 0.);
              vcolor = mtrlDiffuse * lightDiffuse * (d + lightAmbient);
@@ -56,10 +68,16 @@ void ofApp::setup(){
             vec3 H = normalize(L + V);
             float s = pow(max(dot(N, H), 0.), mtrlShine);
 
- 
             // shine logic
             vcolor = mtrlDiffuse*lightDiffuse*(d + lightAmbient);
             vcolor += mtrlSpecular*lightSpecular*s;
+ 
+            //lorenzian attenuattion
+
+            float hh = lightHalfDist*lightHalfDist;
+            float atten = lightStrength*hh/(hh + dot(lightDist,lightDist));
+ 
+             vcolor *= atten;
  
         }
  
@@ -90,8 +108,17 @@ void ofApp::draw(){
 	cam.begin();
 	shader.begin();
     shader.setUniform3f("eye", cam.getPosition());
-    mesh.draw();
-	shader.end();
+    
+    ofSetRandomSeed(58309834);
+    
+    for(int i=0; i<50; ++i){
+        ofPushMatrix();
+            ofTranslate(ofRandomUniform<vec3>(-1.,1.));
+            ofScale(0.15);
+            mesh.draw();
+        ofPopMatrix();
+    }
+    shader.end();
 	cam.end();
 }
 
