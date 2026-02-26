@@ -4,14 +4,6 @@
 	"classes": {},
 	"objectVersion": "54",
 	"objects": {
-		"0D9EBD67-6F46-4761-8A35-FEC90BEAB979": {
-			"fileEncoding": "4",
-			"isa": "PBXFileReference",
-			"lastKnownFileType": "folder",
-			"name": "data",
-			"path": "bin/data",
-			"sourceTree": "SOURCE_ROOT"
-		},
 		"191CD6FA2847E21E0085CBB6": {
 			"fileEncoding": "4",
 			"isa": "PBXFileReference",
@@ -40,12 +32,27 @@
 			"shellScript": "\"$OF_PATH/scripts/osx/xcode_project.sh\"\n",
 			"showEnvVarsInLog": "0"
 		},
+		"AE1E1B45-5384-4A6B-817F-A68F24F75C41": {
+			"fileEncoding": "4",
+			"isa": "PBXFileReference",
+			"lastKnownFileType": "folder",
+			"name": "data",
+			"path": "bin/data",
+			"sourceTree": "SOURCE_ROOT"
+		},
 		"BB4B014C10F69532006C3DED": {
 			"children": [],
 			"isa": "PBXGroup",
 			"name": "addons",
 			"path": "/Users/pandora/of_v0.12.1_osx_release/addons",
 			"sourceTree": "<absolute>"
+		},
+		"E352942C-6FC1-4243-BD06-B4D572049E06": {
+			"fileEncoding": "4",
+			"isa": "PBXFileReference",
+			"lastKnownFileType": "sourcecode.cpp.h",
+			"name": "ofGraphicsUtil.h",
+			"sourceTree": "<group>"
 		},
 		"E42962A92163ECCD00A6A9E2": {
 			"alwaysOutOfDate": "1",
@@ -77,7 +84,7 @@
 				"191EF70929D778A400F35F26",
 				"BB4B014C10F69532006C3DED",
 				"E4B69B5B0A3A1756003C02F2",
-				"0D9EBD67-6F46-4761-8A35-FEC90BEAB979"
+				"AE1E1B45-5384-4A6B-817F-A68F24F75C41"
 			],
 			"isa": "PBXGroup",
 			"sourceTree": "<group>"
@@ -244,7 +251,7 @@
 				"E4B69E1D0A3A1BDC003C02F2",
 				"E4B69E1E0A3A1BDC003C02F2",
 				"E4B69E1F0A3A1BDC003C02F2",
-				"F2E1231C-1921-4006-9839-B6F6319C0209"
+				"E352942C-6FC1-4243-BD06-B4D572049E06"
 			],
 			"isa": "PBXGroup",
 			"path": "src",
@@ -302,13 +309,6 @@
 			"isa": "PBXFileReference",
 			"lastKnownFileType": "text.xcconfig",
 			"path": "Project.xcconfig",
-			"sourceTree": "<group>"
-		},
-		"F2E1231C-1921-4006-9839-B6F6319C0209": {
-			"fileEncoding": "4",
-			"isa": "PBXFileReference",
-			"lastKnownFileType": "sourcecode.cpp.h",
-			"name": "ofGraphicsUtil.h",
 			"sourceTree": "<group>"
 		}
 	},

@@ -19,6 +19,8 @@ void ofApp::setup(){
       uniform mat4 projectionMatrix;
       uniform mat4 viewMatrix;
       uniform mat4 modelMatrix;
+ 
+      uniform vec3 eye;
 
       in vec4 position;
       in vec3 normal;
@@ -31,12 +33,33 @@ void ofApp::setup(){
          vec3 N = normalize(mat3(modelMatrix)*normal); //assumes only uniform scaling
          gl_Position = projectionMatrix * viewMatrix * vec4(pos,1.);
  
-             vcolor = color ;
-             vec3 L = vec3 (0., 1., 0.) ;
-             float a = 0.2;
-             float d = max ( dot (N, L), 0.) ;
-             vcolor *= (d+a);
-             
+            // light material setup
+ 
+            vcolor = color ;
+             vec3 lightPos = vec3(0., 100., 0.);
+             float lightAmbient = 0.2;
+             vec3 lightDiffuse = vec3(1.);
+             vec3 lightSpecular = vec3(1.);
+             vec3 mtrlDiffuse = vcolor;
+             vec3 mtrlSpecular = vec3(0.5);
+             float mtrlShine = 60.;
+
+            // Diffuse logic
+ 
+             vec3 L = normalize(lightPos - pos);
+             float d = max(dot(N, L), 0.);
+             vcolor = mtrlDiffuse * lightDiffuse * (d + lightAmbient);
+ 
+            //specular logic
+ 
+            vec3 V = normalize(eye - pos);
+            vec3 H = normalize(L + V);
+            float s = pow(max(dot(N, H), 0.), mtrlShine);
+
+ 
+            // shine logic
+            vcolor = mtrlDiffuse*lightDiffuse*(d + lightAmbient);
+            vcolor += mtrlSpecular*lightSpecular*s;
  
         }
  
@@ -66,8 +89,8 @@ void ofApp::update(){
 void ofApp::draw(){
 	cam.begin();
 	shader.begin();
-	//shader.setUniform1f("appTime", ofGetFrameNum()/ofGetTargetFrameRate());
-	mesh.draw();
+    shader.setUniform3f("eye", cam.getPosition());
+    mesh.draw();
 	shader.end();
 	cam.end();
 }
