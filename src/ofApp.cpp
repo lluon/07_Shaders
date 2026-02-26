@@ -16,27 +16,32 @@ void ofApp::setup(){
 	// Build shader (from GLSL code)
 	build(shader, R"(
 		// Vertex program
-		uniform mat4 modelViewProjectionMatrix; // from OF programmable renderer
-		uniform float appTime;
+          uniform mat4 projectionMatrix;
+          uniform mat4 viewMatrix;
+          uniform mat4 modelMatrix;
+ 
+          in vec4 position;
+          in vec3 normal;
+          in vec3 color;
+          out vec3 vcolor;
 
-		in vec4 position;	// position (vertex attribute from mesh)
-		in vec3 normal;		// normal (vertex attribute from mesh)
-		in vec2 texcoord;	// texture coordinate (vertex attribute from mesh)
-		out vec2 vtexcoord;	// passed to fragment shader
+          void main(){
+            vcolor = vec3(0.,1.,0.);
+            vec3 pos = (modelMatrix*position).xyz; //convert from object to world space
+            vec3 N = normalize(mat3(modelMatrix) * normal); //assumes only uniform scaling
+            gl_Position = projectionMatrix * viewMatrix * vec4(pos, 1.);
+         }
+  }
 
-		void main(){
-			vtexcoord = texcoord;
-			vec4 pos = position;
-			pos.z += 0.1*sin(355./113. * 4. * pos.x + appTime);
-			gl_Position = modelViewProjectionMatrix * pos;
-		}
+
+
 	)", R"(
 		// Fragment program
-		in vec2 vtexcoord;		// interpolant from vertex shader
-		out vec4 fragColor;		// output pixel color (RGBA)
+		in vec3 vcolor;	// interpolant from vertex shader
+		out vec4 fragColor;	// output pixel color (RGBA)
 
 		void main(){
-			vec3 col = vec3(vtexcoord, 0.);
+			vec3 col = vcolor;
 			fragColor = vec4(col, 1.);
 		}
 	)");
