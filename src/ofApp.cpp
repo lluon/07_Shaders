@@ -33,8 +33,9 @@ void ofApp::setup(){
  
              vcolor = color ;
              vec3 L = vec3 (0., 1., 0.) ;
+             float a = 0.2;
              float d = max ( dot (N, L), 0.) ;
-             vcolor *= d ;
+             vcolor *= (d+a);
              
  
         }
